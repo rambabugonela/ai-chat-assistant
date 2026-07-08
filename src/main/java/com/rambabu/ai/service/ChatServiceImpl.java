@@ -1,6 +1,6 @@
-package com.rambabu.ai.com.rambabu.ai.service;
+package com.rambabu.ai.service;
 
-import com.rambabu.ai.com.rambabu.ai.dto.ChatResponse;
+import com.rambabu.ai.dto.ChatResponse;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
 

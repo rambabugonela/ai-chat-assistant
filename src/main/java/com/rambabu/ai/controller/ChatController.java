@@ -1,8 +1,8 @@
-package com.rambabu.ai.com.rambabu.ai.controller;
+package com.rambabu.ai.controller;
 
-import com.rambabu.ai.com.rambabu.ai.dto.ChatRequest;
-import com.rambabu.ai.com.rambabu.ai.dto.ChatResponse;
-import com.rambabu.ai.com.rambabu.ai.service.ChatService;
+import com.rambabu.ai.dto.ChatResponse;
+import com.rambabu.ai.service.ChatService;
+import com.rambabu.ai.dto.ChatRequest;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

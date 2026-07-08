@@ -1,4 +1,4 @@
-package com.rambabu.ai.com.rambabu.ai.dto;
+package com.rambabu.ai.dto;
 
 import jakarta.validation.constraints.NotBlank;
 

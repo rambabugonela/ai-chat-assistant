@@ -1,4 +1,4 @@
-package com.rambabu.ai.com.rambabu.ai.controller;
+package com.rambabu.ai.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
