@@ -2,10 +2,12 @@ package com.rambabu.ai.service;
 
 import com.rambabu.ai.dto.ChatResponse;
 import com.rambabu.ai.prompt.PromptProvider;
+import com.rambabu.ai.prompt.PromptType;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Service
@@ -21,24 +23,24 @@ public class ChatServiceImpl implements ChatService{
     }
 
     @Override
-    public ChatResponse chat(String message) {
-        long start = System.currentTimeMillis();
+    public ChatResponse chat(String message, PromptType promptType) {
+        long startTime = System.currentTimeMillis();
 
         String response = chatClient
                 .prompt()
-                .system(promptProvider.getSystemPrompt("javaArchitect"))
+                .system(promptProvider.getSystemPrompt(promptType))
                 .user(message)
                 .call()
                 .content();
 
-        long end = System.currentTimeMillis();
+        long endTime = System.currentTimeMillis();
 
 
         return new ChatResponse(
                 response,
                 modelName,
-                LocalDateTime.now(),
-                end - start
+                Instant.now(),
+                endTime - startTime
         );
     }
 }

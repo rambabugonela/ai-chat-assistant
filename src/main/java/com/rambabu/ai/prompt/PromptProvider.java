@@ -1,23 +1,37 @@
 package com.rambabu.ai.prompt;
 
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.EnumMap;
+import java.util.Map;
 
 @Component
 public class PromptProvider {
+    public final Map<PromptType, String> promptTypeStringMap = new EnumMap<>(PromptType.class);
 
-    public String getSystemPrompt(String promptType){
+    private final ResourceLoader resourceLoader;
 
-       if(promptType.equals("javaArchitect"))
-        return """
-                You are a Senior Java Architect with 20 years of experience.
 
-                Rules:
-                1. Answer professionally.
-                2. Explain concepts with enterprise examples.
-                3. Follow SOLID principles.
-                4. Prefer Java 21 features.
-                5. Keep answers concise.
-                6. If you don't know something, clearly say so.
-                """;
+    public PromptProvider(ResourceLoader resourceLoader){
+        this.resourceLoader = resourceLoader;
+    }
+    public String getSystemPrompt(@MonotonicNonNull PromptType promptType){
+
+        Resource resource = resourceLoader.getResource("classpath:prompts/"+promptType.getFileName());
+
+        try(InputStream inputStream = resource.getInputStream()) {
+
+            return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw  new IllegalArgumentException("Prompt not defined" + promptType);
+        }
+
+
     }
 }

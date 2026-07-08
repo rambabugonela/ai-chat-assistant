@@ -1,6 +1,7 @@
 package com.rambabu.ai.controller;
 
 import com.rambabu.ai.dto.ChatResponse;
+import com.rambabu.ai.prompt.PromptType;
 import com.rambabu.ai.service.ChatService;
 import com.rambabu.ai.dto.ChatRequest;
 import jakarta.validation.Valid;
@@ -20,6 +21,6 @@ public class ChatController {
     }
     @PostMapping
     public ChatResponse chat(@Valid @RequestBody ChatRequest request){
-        return chatService.chat(request.message());
+        return chatService.chat(request.message(), PromptType.JAVA_ARCHITECT);
     }
 }
