@@ -13,8 +13,8 @@ import java.time.LocalDateTime;
 @Service
 public class ChatServiceImpl implements ChatService{
 
-    final private ChatClient chatClient;
-    final private PromptProvider promptProvider;
+    private final ChatClient chatClient;
+    private final PromptProvider promptProvider;
     @Value("${spring.ai.google.genai.chat.options.model}")
     private String modelName;
     public ChatServiceImpl(ChatClient.Builder builder, PromptProvider promptProvider) {

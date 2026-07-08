@@ -1,9 +1,13 @@
 package com.rambabu.ai.dto;
 
+import autovalue.shaded.org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import com.rambabu.ai.prompt.PromptType;
 import jakarta.validation.constraints.NotBlank;
 
 public record ChatRequest(
         @NotBlank(message = "Message")
-        String message
+        String message,
+        @MonotonicNonNull
+        PromptType promptType
 ) {
 }
