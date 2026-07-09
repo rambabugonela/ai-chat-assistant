@@ -5,5 +5,5 @@ import com.rambabu.ai.prompt.PromptType;
 
 public interface ChatService {
 
-    ChatResponse chat(String message, PromptType promptType);
+    ChatResponse chat(String message, PromptType promptType, String sessionId);
 }
