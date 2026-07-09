@@ -1,6 +1,7 @@
 package com.rambabu.ai.service;
 
 import com.rambabu.ai.dto.ChatResponse;
+import com.rambabu.ai.exception.AiExceptionTranslator;
 import com.rambabu.ai.memory.Conversation;
 import com.rambabu.ai.memory.MessageMapper;
 import com.rambabu.ai.prompt.PromptProvider;
@@ -22,38 +23,44 @@ public class ChatServiceImpl implements ChatService {
     private final PromptProvider promptProvider;
     private final ConversationStore conversationStore;
     private final MessageMapper messageMapper;
+    private final AiExceptionTranslator aiExceptionTranslator;
 
     @Value("${spring.ai.google.genai.chat.options.model}")
     private String modelName;
 
-    public ChatServiceImpl(ChatClient.Builder builder, PromptProvider promptProvider, ConversationStore conversationStore, MessageMapper messageMapper) {
+    public ChatServiceImpl(ChatClient.Builder builder, PromptProvider promptProvider, ConversationStore conversationStore, MessageMapper messageMapper, AiExceptionTranslator aiExceptionTranslator) {
         this.chatClient = builder.build();
         this.promptProvider = promptProvider;
         this.conversationStore = conversationStore;
         this.messageMapper = messageMapper;
+        this.aiExceptionTranslator = aiExceptionTranslator;
     }
 
     @Override
     public ChatResponse chat(String message, PromptType promptType, String sessionId) {
-        long start = System.currentTimeMillis();
-
-        Conversation conversation = loadOrCreateConversation(message, promptType, sessionId);
-        List<Message> chatMessages = messageMapper.toSpringMessages(conversation);
-        conversation.addUserMessage(message);
-        String response = chatClient
-                .prompt(new Prompt(chatMessages))
-                .call()
-                .content();
-        conversation.addAssistantMessage(response);
-        conversationStore.saveConversation(conversation);
-        long end = System.currentTimeMillis();
-
-        return new ChatResponse(
-                response,
-                modelName,
-                Instant.now(),
-                end - start
-        );
+        ChatResponse chatResponse = null;
+        try{
+            long start = System.currentTimeMillis();
+            Conversation conversation = loadOrCreateConversation(message, promptType, sessionId);
+            conversation.addUserMessage(message);
+            List<Message> chatMessages = messageMapper.toSpringMessages(conversation);
+            String response = chatClient
+                    .prompt(new Prompt(chatMessages))
+                    .call()
+                    .content();
+            conversation.addAssistantMessage(response);
+            conversationStore.saveConversation(conversation);
+            long end = System.currentTimeMillis();
+            chatResponse = new ChatResponse(
+                    response,
+                    modelName,
+                    Instant.now(),
+                    end - start
+            );
+        }catch (RuntimeException e){
+            throw aiExceptionTranslator.translate(e);
+        }
+        return chatResponse;
     }
 
     private @NonNull Conversation loadOrCreateConversation(String message, PromptType promptType, String sessionId) {
