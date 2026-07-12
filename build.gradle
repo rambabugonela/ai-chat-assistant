@@ -29,13 +29,18 @@ dependencies {
 
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+	implementation "org.springframework.ai:spring-ai-pdf-document-reader"
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation "org.springframework.ai:spring-ai-starter-model-ollama"
 
 	implementation "org.springframework.ai:spring-ai-starter-model-google-genai"
 
+	implementation "org.springframework.ai:spring-ai-starter-vector-store-pgvector"
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	runtimeOnly 'org.postgresql:postgresql'
 }

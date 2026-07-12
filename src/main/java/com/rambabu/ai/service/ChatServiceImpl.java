@@ -44,6 +44,7 @@ public class ChatServiceImpl implements ChatService {
             Conversation conversation = loadOrCreateConversation(message, promptType, sessionId);
             conversation.addUserMessage(message);
             List<Message> chatMessages = messageMapper.toSpringMessages(conversation);
+
             String response = chatClient
                     .prompt(new Prompt(chatMessages))
                     .call()
@@ -55,7 +56,8 @@ public class ChatServiceImpl implements ChatService {
                     response,
                     modelName,
                     Instant.now(),
-                    end - start
+                    end - start,
+                    List.of()
             );
         }catch (RuntimeException e){
             throw aiExceptionTranslator.translate(e);
