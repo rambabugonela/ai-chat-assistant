@@ -2,6 +2,8 @@ package com.rambabu.ai.rag.service;
 
 import com.rambabu.ai.memory.Conversation;
 import com.rambabu.ai.rag.config.PromptTemplates;
+import com.rambabu.ai.rag.model.RetrievalMode;
+import com.rambabu.ai.rag.model.RewrittenQuery;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
 
@@ -18,9 +20,12 @@ public class DefaultQueryRewriter implements QueryRewriter {
 
 
     @Override
-    public String rewrite(String question, Conversation conversation) {
+    public RewrittenQuery rewrite(String question, Conversation conversation) {
         if (conversation.getMessages().size() < 2) {
-            return question;
+            return new RewrittenQuery(
+                    question,
+                    RetrievalMode.DOCUMENTS
+            );
         }
         String prompt = PromptTemplates.QUERY_REWRITE
                 .formatted(
@@ -31,7 +36,9 @@ public class DefaultQueryRewriter implements QueryRewriter {
         return chatClient
                 .prompt(prompt)
                 .call()
-                .content();   // temporary
+                .entity(RewrittenQuery.class);
+
+        // temporary
     }
 
     private String buildConversationHistory(Conversation conversation) {

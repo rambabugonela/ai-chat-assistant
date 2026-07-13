@@ -5,6 +5,8 @@ import com.rambabu.ai.exception.AiServiceException;
 import com.rambabu.ai.exception.ErrorCode;
 import com.rambabu.ai.memory.Conversation;
 import com.rambabu.ai.prompt.PromptType;
+import com.rambabu.ai.rag.model.RetrievalMode;
+import com.rambabu.ai.rag.model.RewrittenQuery;
 import com.rambabu.ai.service.ConversationStore;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
@@ -35,14 +37,16 @@ public class DefaultRagChatService
         long start = System.currentTimeMillis();
         Conversation conversation =
                 loadOrCreateConversation(sessionId);
-        String rewrittenQuestion =
-                queryRewriter.rewrite(
-                        question,
-                        conversation
-                );
+        RewrittenQuery rewrittenQuery =
+                queryRewriter.rewrite(question, conversation);
+
+        System.out.println("Question      : " + rewrittenQuery.question());
+        System.out.println("Retrieval Mode: " + rewrittenQuery.retrievalMode());
         List<Document> documents =
-                retrievalService.retrieveRelevantDocuments(rewrittenQuestion);
-        if (documents.isEmpty()) {
+                rewrittenQuery.retrievalMode() == RetrievalMode.DOCUMENTS
+                        ? retrievalService.retrieveRelevantDocuments(rewrittenQuery.question())
+                        : List.of();
+        if (rewrittenQuery.retrievalMode().equals(RetrievalMode.DOCUMENTS) && documents.isEmpty()) {
             return new ChatResponse(
                     "I couldn't find any relevant information...",
                     model,
@@ -52,8 +56,8 @@ public class DefaultRagChatService
             );
         }
         Prompt prompt =
-                promptBuilder.buildPrompt(rewrittenQuestion, documents, conversation);
-
+                promptBuilder.buildPrompt(rewrittenQuery.question(), documents, conversation);
+        System.out.println(prompt.getContents());
         String llmResponse =
                 chatModel.call(prompt).getResult().getOutput().getText();
         List<String> sources = documents.stream()

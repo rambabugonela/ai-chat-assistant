@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.rambabu.ai.rag.config.PromptTemplates.PROMPT_TEMPLATE;
+import static com.rambabu.ai.rag.config.PromptTemplates.*;
 
 @Service
 public class DefaultPromptBuilder implements PromptBuilder {
@@ -19,17 +19,28 @@ public class DefaultPromptBuilder implements PromptBuilder {
     public Prompt buildPrompt(String question, List<Document> documents, Conversation conversation) {
         String context = buildContext(documents);
         String conversationHistory = conversation.asTranscript();
+        PromptTemplate promptTemplate;
 
-        PromptTemplate promptTemplate =
-                new PromptTemplate(PROMPT_TEMPLATE);
+        if (documents.isEmpty()) {
+            promptTemplate = new PromptTemplate(MEMORY_PROMPT);
+        } else {
+            promptTemplate = new PromptTemplate(DOCUMENT_PROMPT);
+        }
 
+        Map<String, Object> variables;
 
-        Map<String, Object> variables =
-                Map.of(
-                        "conversation", conversationHistory,
-                        "context", context,
-                        "question", question
-                );
+        if (documents.isEmpty()) {
+            variables = Map.of(
+                    "conversation", conversationHistory,
+                    "question", question
+            );
+        } else {
+            variables = Map.of(
+                    "conversation", conversationHistory,
+                    "context", context,
+                    "question", question
+            );
+        }
 
         return promptTemplate.create(variables);
     }
