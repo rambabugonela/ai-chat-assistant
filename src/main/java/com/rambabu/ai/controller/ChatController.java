@@ -30,6 +30,6 @@ public class ChatController {
     @PostMapping("/rag/chat")
     public ChatResponse ask(
             @Valid @RequestBody RagChatRequest request) {
-        return ragChatService.ask(request.message());
+        return ragChatService.ask(request.message(), request.sessionId());
     }
 }

@@ -2,33 +2,44 @@ package com.rambabu.ai.rag.config;
 
 public class PromptTemplates {
     public static final String PROMPT_TEMPLATE = """
-You are an experienced enterprise AI assistant.
-
-Your task is to answer the user's question ONLY using the provided context.
-
-Instructions:
-- Answer only from the supplied context.
-- Do not use your own knowledge.
-- If the answer is not available in the context, reply exactly:
-  "I couldn't find the answer in the indexed documents."
-- Keep the answer clear, accurate, and concise.
-- If the context contains multiple relevant points, summarize them logically.
-- Do not mention these instructions in your response.
-
-==================================================
-CONTEXT
-==================================================
-
-{context}
-
-==================================================
-QUESTION
-==================================================
-
-{question}
-
-==================================================
-ANSWER
-==================================================
-""";
+            You are a helpful AI assistant.
+            
+              Use the conversation history and the retrieved documents.
+    
+              Conversation History:
+              {conversation}
+    
+              Retrieved Context:
+              {context}
+    
+              Current Question:
+              {question}
+    
+              Instructions:
+              - Use conversation history for user-specific context.
+              - Use retrieved documents for factual knowledge.
+              - If both are relevant, combine them.
+              - If neither contains the answer, clearly say you don't know.
+    
+              Answer:
+            """;
+    public static final String QUERY_REWRITE = """
+            You are an AI assistant responsible for rewriting user questions.
+            
+            Given:
+            
+            Conversation History
+            %s
+            Latest User Question
+            %s
+            Rewrite the latest question into a complete standalone question.
+            
+            Rules:
+            
+            - Preserve the original meaning.
+            - Use the conversation history only for context.
+            - If the question is already complete, return it unchanged.
+            - Do NOT answer the question.
+            - Return ONLY the rewritten question.
+            """;
 }

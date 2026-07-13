@@ -9,7 +9,7 @@ import java.time.Instant;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(Exception.class)
+    @ExceptionHandler(AiServiceException.class)
     public ResponseEntity<ErrorResponse> handleAiServiceException(final AiServiceException aiServiceException){
         ErrorCode errorCode = aiServiceException.getErrorCode();
 

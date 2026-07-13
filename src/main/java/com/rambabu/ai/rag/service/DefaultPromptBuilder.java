@@ -1,5 +1,6 @@
 package com.rambabu.ai.rag.service;
 
+import com.rambabu.ai.memory.Conversation;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.document.Document;
@@ -15,14 +16,17 @@ import static com.rambabu.ai.rag.config.PromptTemplates.PROMPT_TEMPLATE;
 public class DefaultPromptBuilder implements PromptBuilder {
 
     @Override
-    public Prompt buildPrompt(String question, List<Document> documents) {
+    public Prompt buildPrompt(String question, List<Document> documents, Conversation conversation) {
         String context = buildContext(documents);
+        String conversationHistory = conversation.asTranscript();
 
         PromptTemplate promptTemplate =
                 new PromptTemplate(PROMPT_TEMPLATE);
 
+
         Map<String, Object> variables =
                 Map.of(
+                        "conversation", conversationHistory,
                         "context", context,
                         "question", question
                 );

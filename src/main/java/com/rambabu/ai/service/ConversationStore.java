@@ -1,5 +1,6 @@
 package com.rambabu.ai.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.rambabu.ai.memory.Conversation;
 
 import java.util.Optional;
