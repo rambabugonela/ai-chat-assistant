@@ -1,6 +1,15 @@
 package com.rambabu.ai.rag.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.rambabu.ai.exception.AiServiceException;
+import com.rambabu.ai.exception.ErrorCode;
+import com.rambabu.ai.memory.Conversation;
+import com.rambabu.ai.prompt.PromptType;
+import com.rambabu.ai.rag.model.RetrievalMode;
+import com.rambabu.ai.rag.model.RewrittenQuery;
+import com.rambabu.ai.service.ConversationStore;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NonNull;
 import org.springframework.ai.chat.model.ChatModel;
 import com.rambabu.ai.dto.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
@@ -18,15 +27,26 @@ public class DefaultRagChatService
     private final RetrievalService retrievalService;
     private final PromptBuilder promptBuilder;
     private final ChatModel chatModel;
+    private final ConversationStore conversationStore;
+    private final QueryRewriter queryRewriter;
     @Value("${spring.ai.google.genai.chat.options.model}")
     private String model;
 
     @Override
-    public ChatResponse ask(String question) {
+    public ChatResponse ask(String question,  String sessionId) {
         long start = System.currentTimeMillis();
+        Conversation conversation =
+                loadOrCreateConversation(sessionId);
+        RewrittenQuery rewrittenQuery =
+                queryRewriter.rewrite(question, conversation);
+
+        System.out.println("Question      : " + rewrittenQuery.question());
+        System.out.println("Retrieval Mode: " + rewrittenQuery.retrievalMode());
         List<Document> documents =
-                retrievalService.retrieveRelevantDocuments(question);
-        if (documents.isEmpty()) {
+                rewrittenQuery.retrievalMode() == RetrievalMode.DOCUMENTS
+                        ? retrievalService.retrieveRelevantDocuments(rewrittenQuery.question())
+                        : List.of();
+        if (rewrittenQuery.retrievalMode().equals(RetrievalMode.DOCUMENTS) && documents.isEmpty()) {
             return new ChatResponse(
                     "I couldn't find any relevant information...",
                     model,
@@ -36,8 +56,8 @@ public class DefaultRagChatService
             );
         }
         Prompt prompt =
-                promptBuilder.buildPrompt(question, documents);
-
+                promptBuilder.buildPrompt(rewrittenQuery.question(), documents, conversation);
+        System.out.println(prompt.getContents());
         String llmResponse =
                 chatModel.call(prompt).getResult().getOutput().getText();
         List<String> sources = documents.stream()
@@ -45,13 +65,21 @@ public class DefaultRagChatService
                 .distinct()
                 .toList();
         long end = System.currentTimeMillis();
-       return new ChatResponse(
+       ChatResponse chatResponse =  new ChatResponse(
                llmResponse,
                 model,
                 Instant.now(),
                 end-start,
                sources
         );
+        conversation.addUserMessage(question);
+        conversation.addAssistantMessage(chatResponse.response());
+        conversationStore.saveConversation(conversation);
+        return chatResponse;
+    }
 
+    private @NonNull Conversation loadOrCreateConversation(String sessionId) {
+        return conversationStore.getConversation(sessionId)
+                .orElseGet(() -> new Conversation(sessionId));
     }
 }
