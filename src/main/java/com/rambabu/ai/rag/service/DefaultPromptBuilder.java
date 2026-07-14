@@ -19,18 +19,17 @@ public class DefaultPromptBuilder implements PromptBuilder {
     public Prompt buildPrompt(String question, List<Document> documents, Conversation conversation) {
         String context = buildContext(documents);
         String conversationHistory = conversation.asTranscript();
-        PromptTemplate promptTemplate;
-
-        if (documents.isEmpty()) {
-            promptTemplate = new PromptTemplate(MEMORY_PROMPT);
-        } else {
-            promptTemplate = new PromptTemplate(DOCUMENT_PROMPT);
-        }
-
+        boolean memoryRequest = documents.isEmpty();
+        PromptTemplate promptTemplate =
+                new PromptTemplate(
+                        memoryRequest
+                                ? MEMORY_PROMPT
+                                : DOCUMENT_PROMPT);
         Map<String, Object> variables;
 
         if (documents.isEmpty()) {
             variables = Map.of(
+                    "summary", conversation.summaryText(),
                     "conversation", conversationHistory,
                     "question", question
             );

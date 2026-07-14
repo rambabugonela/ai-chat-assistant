@@ -1,8 +1,6 @@
 package com.rambabu.ai;
 
-import com.rambabu.ai.dto.ChatResponse;
 import com.rambabu.ai.rag.indexer.DocumentIndexer;
-import com.rambabu.ai.rag.service.RagChatService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

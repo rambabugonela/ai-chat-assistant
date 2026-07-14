@@ -1,17 +1,14 @@
 package com.rambabu.ai.rag.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.rambabu.ai.exception.AiServiceException;
-import com.rambabu.ai.exception.ErrorCode;
+import com.rambabu.ai.dto.ChatResponse;
 import com.rambabu.ai.memory.Conversation;
-import com.rambabu.ai.prompt.PromptType;
+import com.rambabu.ai.memory.ConversationSummary;
 import com.rambabu.ai.rag.model.RetrievalMode;
 import com.rambabu.ai.rag.model.RewrittenQuery;
 import com.rambabu.ai.service.ConversationStore;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.ai.chat.model.ChatModel;
-import com.rambabu.ai.dto.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.document.Document;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,6 +28,11 @@ public class DefaultRagChatService
     private final QueryRewriter queryRewriter;
     @Value("${spring.ai.google.genai.chat.options.model}")
     private String model;
+    private final ConversationSummarizer conversationSummarizer;
+    @Value("${conversation.summary.threshold}")
+    private int summaryThreshold;
+    @Value("${conversation.summary.keep-recent-messages}")
+    private int keepRecentMessages;
 
     @Override
     public ChatResponse ask(String question,  String sessionId) {
@@ -40,8 +42,6 @@ public class DefaultRagChatService
         RewrittenQuery rewrittenQuery =
                 queryRewriter.rewrite(question, conversation);
 
-        System.out.println("Question      : " + rewrittenQuery.question());
-        System.out.println("Retrieval Mode: " + rewrittenQuery.retrievalMode());
         List<Document> documents =
                 rewrittenQuery.retrievalMode() == RetrievalMode.DOCUMENTS
                         ? retrievalService.retrieveRelevantDocuments(rewrittenQuery.question())
@@ -57,7 +57,6 @@ public class DefaultRagChatService
         }
         Prompt prompt =
                 promptBuilder.buildPrompt(rewrittenQuery.question(), documents, conversation);
-        System.out.println(prompt.getContents());
         String llmResponse =
                 chatModel.call(prompt).getResult().getOutput().getText();
         List<String> sources = documents.stream()
@@ -74,6 +73,12 @@ public class DefaultRagChatService
         );
         conversation.addUserMessage(question);
         conversation.addAssistantMessage(chatResponse.response());
+        if (conversation.requiresSummarization(summaryThreshold)) {
+            ConversationSummary summary =
+                    conversationSummarizer.summarize(conversation);
+            conversation.updateSummary(summary);
+            conversation.compress(keepRecentMessages);
+        }
         conversationStore.saveConversation(conversation);
         return chatResponse;
     }
