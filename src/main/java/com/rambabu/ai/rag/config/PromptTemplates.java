@@ -31,18 +31,22 @@ public class PromptTemplates {
             
             Rules:
             
-            - Use only the conversation history.
-            - Do NOT use external knowledge.
-            - If the answer cannot be found in the conversation, reply:
-              "I don't know based on our conversation."
-            
-            Conversation History:
-            
+            1. Conversation Summary
+            2. Recent Conversation
+
+            Conversation Summary
+
+            {summary}
+
+            Recent Conversation
+
             {conversation}
-            
-            Question:
-            
+
+            Question
+
             {question}
+            
+            
             """;
     public static final String DOCUMENT_PROMPT = """
             You are a helpful AI assistant.
@@ -105,6 +109,34 @@ public class PromptTemplates {
             %s
             
             Latest User Question:
+            
+            %s
+            """;
+    public static final String CONVERSATION_SUMMARIZER = """
+            You are an AI assistant responsible for summarizing conversations.
+            
+            Your summary must preserve:
+            
+            • User name
+            • Personal information shared by the user
+            • Preferences
+            • Important facts
+            • User goals
+            • Unresolved questions
+            • Ongoing tasks
+            
+            Remove:
+            
+            • Repeated information
+            • Greetings
+            • Small talk
+            • Duplicate questions
+            
+            Keep the summary under 250 words.
+            
+            Return ONLY the summary.
+            
+            Conversation:
             
             %s
             """;

@@ -14,12 +14,15 @@ public class Conversation {
     private final String sessionId;
     private final List<Message> messages;
     @Getter
+    ConversationSummary summary;
+    @Getter
     private Instant lastAccessed;
 
     public Conversation(String sessionId) {
         this.sessionId = sessionId;
         this.messages = new ArrayList<>();
         this.lastAccessed = Instant.now();
+        this.summary = null;
     }
 
     public void addUserMessage(String message){
@@ -41,6 +44,9 @@ public class Conversation {
         return Collections.unmodifiableList(messages);
     }
 
+    public boolean requiresSummarization(int threshold) {
+        return messages.size() >= threshold;
+    }
 
 
 
@@ -52,5 +58,41 @@ public class Conversation {
                                 message.role(),
                                 message.content()))
                 .collect(Collectors.joining(System.lineSeparator()));
+    }
+
+    public String asSummaryInput() {
+        return messages.stream()
+                .map(m -> m.role() + ": " + m.content())
+                .collect(Collectors.joining(System.lineSeparator()));
+    }
+
+    public void updateSummary(ConversationSummary summary) {
+        if (summary == null) {
+            throw new IllegalArgumentException(
+                    "Conversation summary cannot be null.");
+        }
+        this.summary = summary;
+    }
+
+    public void compress(int keepLastMessages) {
+        if (keepLastMessages <= 0) {
+            throw new IllegalArgumentException(
+                    "keepLastMessages must be greater than zero.");
+        }
+        if (messages.size() <= keepLastMessages) {
+            return;
+        }
+        int startIndex = messages.size() - keepLastMessages;
+        List<Message> recentMessages =
+                new ArrayList<>(messages.subList(startIndex, messages.size()));
+        messages.clear();
+        messages.addAll(recentMessages);
+    }
+
+    public String summaryText() {
+
+        return summary == null
+                ? ""
+                : summary.content();
     }
 }
