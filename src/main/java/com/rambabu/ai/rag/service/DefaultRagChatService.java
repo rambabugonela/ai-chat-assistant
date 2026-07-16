@@ -8,6 +8,7 @@ import com.rambabu.ai.rag.model.RewrittenQuery;
 import com.rambabu.ai.service.ConversationStore;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
+import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.document.Document;
@@ -23,7 +24,8 @@ public class DefaultRagChatService
         implements RagChatService {
     private final RetrievalService retrievalService;
     private final PromptBuilder promptBuilder;
-    private final ChatModel chatModel;
+   // private final ChatModel chatModel;
+    private final ChatClient chatClient;
     private final ConversationStore conversationStore;
     private final QueryRewriter queryRewriter;
     @Value("${spring.ai.google.genai.chat.options.model}")
@@ -58,7 +60,7 @@ public class DefaultRagChatService
         Prompt prompt =
                 promptBuilder.buildPrompt(rewrittenQuery.question(), documents, conversation);
         String llmResponse =
-                chatModel.call(prompt).getResult().getOutput().getText();
+                chatClient.prompt(prompt).call().content();  // updated for Advisor
         List<String> sources = documents.stream()
                 .map(document -> (String) document.getMetadata().get("file_name"))
                 .distinct()
