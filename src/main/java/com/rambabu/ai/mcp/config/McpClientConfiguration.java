@@ -1,4 +1,4 @@
 package com.rambabu.ai.mcp.config;
 
-public class McpConfiguration {
+public class McpClientConfiguration {
 }
