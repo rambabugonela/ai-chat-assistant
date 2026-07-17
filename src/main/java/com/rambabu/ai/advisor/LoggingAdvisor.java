@@ -37,7 +37,7 @@ public class LoggingAdvisor implements CallAdvisor {
 
         ChatClientResponse response = chain.nextCall(chatClientRequest);
 
-        if (response.chatResponse() != null) {
+        if (response.chatResponse() != null && response.chatResponse().getResult() != null) {
 
             log.info("""
                 =====================================================
