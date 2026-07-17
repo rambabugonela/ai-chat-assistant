@@ -22,31 +22,47 @@ public class LoggingAdvisor implements CallAdvisor {
             @NonNull ChatClientRequest chatClientRequest,
             CallAdvisorChain chain) {
 
-        long start = System.currentTimeMillis();
+        long start = System.nanoTime();
+
+        log.info("""
+            =====================================================
+            LLM REQUEST
+            =====================================================
+            Advisor       : {}
+            User Message  : {}
+            =====================================================
+            """,
+                getName(),
+                chatClientRequest.prompt().getUserMessage().getText());
+
+        ChatClientResponse response = chain.nextCall(chatClientRequest);
+
+        if (response.chatResponse() != null && response.chatResponse().getResult() != null) {
 
             log.info("""
                 =====================================================
-                LLM REQUEST
+                LLM RESPONSE
                 =====================================================
-                Advisor        : {}
-                User Message   : {}
-                Prompt Length  : {} chars
+                {}
                 =====================================================
                 """,
-            getName(),
-            chatClientRequest.prompt().getUserMessage().getText(),
-            chatClientRequest.prompt().getInstructions().getFirst().getText().length());
-        ChatClientResponse response = chain.nextCall(chatClientRequest);
+                    response.chatResponse().getResult().getOutput().getText());
+        }
+        else {
 
-        log.info("""
-                    ========== LLM RESPONSE =========="
-                    Response :{}
-                    =====================================
-                    """, response.chatResponse().getResult().getOutput().getText());
+            log.info("""
+                =====================================================
+                MCP / TOOL RESPONSE
+                =====================================================
+                No final LLM text available.
+                This response most likely contains a tool call.
+                =====================================================
+                """);
+        }
 
-        Duration duration =
-                Duration.ofNanos(System.nanoTime() - start);
-        log.info("duration : {}", duration + " ms");
+        log.info("Duration : {} ms",
+                Duration.ofNanos(System.nanoTime() - start).toMillis());
+
         return response;
     }
     @Override

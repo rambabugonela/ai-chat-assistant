@@ -52,6 +52,15 @@ services:
     volumes:
       - ollama_data:/root/.ollama
 
+  filesystem-mcp:
+    image: mcp/filesystem
+    container_name: filesystem-mcp
+    restart: unless-stopped
+    command:
+      - /workspace
+    volumes:
+      - ./:/workspace
+
 volumes:
 
   postgres_data:
@@ -59,3 +68,5 @@ volumes:
   redis_data:
 
   ollama_data:
+
+  filesystem-mcp:
