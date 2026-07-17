@@ -13,38 +13,35 @@ public class QueryRouter implements QueryClassifier {
         // Conversation
         if (q.contains("previous")
                 || q.contains("last question")
-                || q.contains("earlier")
-                || q.contains("remember")) {
+                || q.contains("remember")
+                || q.contains("earlier")) {
 
             return QueryRoute.CONVERSATION;
         }
 
         // MCP
         if (q.contains("database")
-                || q.contains("application")
+                || q.contains("jvm")
+                || q.contains("system")
                 || q.contains("environment")
                 || q.contains("git")
-                || q.contains("jvm")
-                || q.contains("system")) {
+                || q.contains("application")) {
 
             return QueryRoute.MCP;
         }
 
         // Hybrid
-
         if ((q.contains("redis")
                 || q.contains("spring")
                 || q.contains("java"))
                 &&
-                (q.contains("running")
-                        || q.contains("status")
+                (q.contains("status")
+                        || q.contains("running")
                         || q.contains("health"))) {
 
             return QueryRoute.HYBRID;
         }
 
         return QueryRoute.RAG;
-
     }
-
 }

@@ -1,6 +1,5 @@
 package com.rambabu.ai.routing.handler;
 
-import com.rambabu.ai.dto.ChatRequest;
 import com.rambabu.ai.dto.ChatResponse;
 import com.rambabu.ai.rag.service.RagChatService;
 import com.rambabu.ai.routing.QueryRoute;

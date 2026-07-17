@@ -8,6 +8,7 @@ public enum QueryRoute {
 
     MCP,
 
-    HYBRID
+    HYBRID,
+    UNKNOWN
 
 }
