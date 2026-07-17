@@ -1,4 +1,13 @@
 package com.rambabu.ai.routing;
 
-public class QueryRoute {
+public enum QueryRoute {
+
+    CONVERSATION,
+
+    RAG,
+
+    MCP,
+
+    HYBRID
+
 }

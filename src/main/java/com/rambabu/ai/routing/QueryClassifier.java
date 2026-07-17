@@ -1,4 +1,7 @@
 package com.rambabu.ai.routing;
 
-public class a {
+public interface QueryClassifier {
+
+    QueryRoute classify(String question);
+
 }
