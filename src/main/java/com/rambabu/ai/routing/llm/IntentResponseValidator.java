@@ -8,29 +8,50 @@ import org.springframework.stereotype.Component;
 @Component
 public class IntentResponseValidator {
 
-    public RoutingDecision validate(LlmRoutingResponse response) {
+    public RoutingDecision validate(
+            LlmRoutingResponse response) {
 
         if (response == null) {
-            return RoutingDecision.unknown(
-                    "LLM returned null response.");
+
+            return new RoutingDecision(
+                    QueryRoute.UNKNOWN,
+                    "LLM response is null");
+
         }
 
-        QueryRoute route;
+        if (response.route() == null ||
+                response.route().isBlank()) {
+
+            return new RoutingDecision(
+                    QueryRoute.UNKNOWN,
+                    "Route missing");
+
+        }
 
         try {
 
-            route = QueryRoute.valueOf(
-                    response.route().toUpperCase());
+            QueryRoute route =
+                    QueryRoute.valueOf(
+                            response.route()
+                                    .trim()
+                                    .toUpperCase());
 
-        } catch (Exception ex) {
+            String reason =
+                    response.reason() == null
+                            ? ""
+                            : response.reason().trim();
 
-            return RoutingDecision.unknown(
-                    "Unknown route returned by LLM.");
+            return new RoutingDecision(route,
+                    reason);
+
+        } catch (IllegalArgumentException ex) {
+
+            return new RoutingDecision(
+                    QueryRoute.UNKNOWN,
+                    "Unknown route returned by LLM");
 
         }
 
-        return new RoutingDecision(
-                route,
-                response.reason());
     }
+
 }
