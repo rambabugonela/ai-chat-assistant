@@ -7,4 +7,8 @@ public record RoutingDecision(
         String reason
 
 ) {
+
+    public static RoutingDecision unknown(String reason) {
+        return new RoutingDecision(QueryRoute.UNKNOWN, reason);
+    }
 }
