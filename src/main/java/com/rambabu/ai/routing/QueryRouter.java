@@ -19,17 +19,6 @@ public class QueryRouter implements QueryClassifier {
             return QueryRoute.CONVERSATION;
         }
 
-        // MCP
-        if (q.contains("database")
-                || q.contains("jvm")
-                || q.contains("system")
-                || q.contains("environment")
-                || q.contains("git")
-                || q.contains("application")) {
-
-            return QueryRoute.MCP;
-        }
-
         // Hybrid
         if ((q.contains("redis")
                 || q.contains("spring")
@@ -41,6 +30,18 @@ public class QueryRouter implements QueryClassifier {
 
             return QueryRoute.HYBRID;
         }
+        // MCP
+        if (q.contains("database")
+                || q.contains("jvm")
+                || q.contains("system")
+                || q.contains("environment")
+                || q.contains("git")
+                || q.contains("application")) {
+
+            return QueryRoute.MCP;
+        }
+
+
 
         return QueryRoute.RAG;
     }
