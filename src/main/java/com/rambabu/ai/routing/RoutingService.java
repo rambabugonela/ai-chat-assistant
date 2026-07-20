@@ -1,6 +1,7 @@
 package com.rambabu.ai.routing;
 
 import com.rambabu.ai.dto.ChatResponse;
+import com.rambabu.ai.observability.CorrelationContext;
 import com.rambabu.ai.routing.handler.QueryRouteHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -52,8 +53,12 @@ public class RoutingService {
             decision = new RoutingDecision(fallback, "Rule based fallback");
         }
 
-        log.info("Selected Route : {}, Reason : {}", decision.route(), decision.reason());
-
+        log.info( "AI ROUTING STARTED RequestId={} SessionId={} Question={} Route={} rease={}",
+                CorrelationContext.getRequestId(),
+                sessionId,
+                message,
+                decision.route(),
+                decision.reason());
         QueryRouteHandler handler = handlerMap.get(decision.route());
 
         if (handler == null) {
