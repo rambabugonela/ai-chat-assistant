@@ -3,13 +3,14 @@ package com.rambabu.ai.rag.service;
 import com.rambabu.ai.dto.ChatResponse;
 import com.rambabu.ai.memory.Conversation;
 import com.rambabu.ai.memory.ConversationSummary;
+import com.rambabu.ai.observability.CorrelationContext;
 import com.rambabu.ai.rag.model.RetrievalMode;
 import com.rambabu.ai.rag.model.RewrittenQuery;
 import com.rambabu.ai.service.ConversationStore;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.document.Document;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,11 +21,12 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class DefaultRagChatService
         implements RagChatService {
     private final RetrievalService retrievalService;
     private final PromptBuilder promptBuilder;
-   // private final ChatModel chatModel;
+    // private final ChatModel chatModel;
     private final ChatClient chatClient;
     private final ConversationStore conversationStore;
     private final QueryRewriter queryRewriter;
@@ -37,7 +39,12 @@ public class DefaultRagChatService
     private int keepRecentMessages;
 
     @Override
-    public ChatResponse ask(String question,  String sessionId) {
+    public ChatResponse ask(String question, String sessionId) {
+        log.info( "RAG REQUEST STARTED RequestId={} SessionId={} Question={}",
+                CorrelationContext.getRequestId(),
+                sessionId,
+                question);
+
         long start = System.currentTimeMillis();
         Conversation conversation =
                 loadOrCreateConversation(sessionId);
@@ -66,12 +73,12 @@ public class DefaultRagChatService
                 .distinct()
                 .toList();
         long end = System.currentTimeMillis();
-       ChatResponse chatResponse =  new ChatResponse(
-               llmResponse,
+        ChatResponse chatResponse = new ChatResponse(
+                llmResponse,
                 model,
                 Instant.now(),
-                end-start,
-               sources
+                end - start,
+                sources
         );
         conversation.addUserMessage(question);
         conversation.addAssistantMessage(chatResponse.response());
@@ -82,7 +89,13 @@ public class DefaultRagChatService
             conversation.compress(keepRecentMessages);
         }
         conversationStore.saveConversation(conversation);
+        log.info( "RAG REQUEST STARTED COMPLETED={} Model={} Duration={}ms Status=SUCCESS",
+                CorrelationContext.getRequestId(),
+                model,
+                end - start
+                );
         return chatResponse;
+
     }
 
     private @NonNull Conversation loadOrCreateConversation(String sessionId) {
