@@ -20,6 +20,8 @@ docs
 *.log
 logs
 
+.env
+
 # Everything under build except the JAR
 build/*
 !build/libs/
