@@ -1,0 +1,26 @@
+# Git
+.git
+.gitignore
+
+# IDE
+.idea
+.vscode
+
+# Gradle
+.gradle
+
+# Source
+src
+
+# Documentation
+README.md
+docs
+
+# Logs
+*.log
+logs
+
+# Everything under build except the JAR
+build/*
+!build/libs/
+!build/libs/ai-chat-assistant-0.0.1-SNAPSHOT.jar
