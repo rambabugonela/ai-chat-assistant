@@ -14,7 +14,7 @@ import java.time.Duration;
 import java.util.Optional;
 
 @Repository
-@Profile("dev")
+@Profile({"docker","prod"})
 public class RedisConversationStore implements ConversationStore {
     private final RedisTemplate<String, String> redisTemplate;
     private final String KEY_PREFIX = "conversation:";

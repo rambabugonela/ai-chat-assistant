@@ -3,6 +3,8 @@ package com.rambabu.ai.rag.service;
 import com.rambabu.ai.dto.ChatResponse;
 import com.rambabu.ai.memory.Conversation;
 import com.rambabu.ai.memory.ConversationSummary;
+import com.rambabu.ai.observability.AIMetricType;
+import com.rambabu.ai.observability.AIObservabilityService;
 import com.rambabu.ai.observability.CorrelationContext;
 import com.rambabu.ai.rag.model.RetrievalMode;
 import com.rambabu.ai.rag.model.RewrittenQuery;
@@ -37,6 +39,7 @@ public class DefaultRagChatService
     private int summaryThreshold;
     @Value("${conversation.summary.keep-recent-messages}")
     private int keepRecentMessages;
+    private final AIObservabilityService observabilityService;
 
     @Override
     public ChatResponse ask(String question, String sessionId) {
@@ -46,6 +49,8 @@ public class DefaultRagChatService
                 question);
 
         long start = System.currentTimeMillis();
+        observabilityService.increment(AIMetricType.TOTAL_REQUEST);
+        observabilityService.increment(AIMetricType.RAG_REQUEST);
         Conversation conversation =
                 loadOrCreateConversation(sessionId);
         RewrittenQuery rewrittenQuery =
@@ -94,6 +99,8 @@ public class DefaultRagChatService
                 model,
                 end - start
                 );
+        observabilityService.recordDuration(
+                System.currentTimeMillis() - start);
         return chatResponse;
 
     }

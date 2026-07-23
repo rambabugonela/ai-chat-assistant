@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
-@Profile("local")
+@Profile("dev")
 public class InMemoryConversationStore implements ConversationStore{
     private final Map<String, Conversation> inMemoryMap = new ConcurrentHashMap<>();
 
